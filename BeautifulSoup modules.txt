@@ -1,0 +1,161 @@
+
+### use request to get the html ###
+### use beautiful soup to obtain the information then ###
+
+import requests
+from bs4 import BeautifulSoup
+
+webpage_response = requests.get('https://s3.amazonaws.com/codecademy-content/courses/beautifulsoup/shellter.html')
+
+webpage = webpage_response.content
+soup = BeautifulSoup(webpage, 'html.parser')
+print(soup)
+
+### info on tags ###
+for example: <\p>
+
+print(soup.p)
+print(soup.p.name)
+print(soup.p.attr)
+print(soup.p.string)
+
+### navigating by tags ###
+
+for child in soup.div.children:
+  print(child)
+
+for parent in soup.li.parents:
+  print(parent)
+
+#### find all ###
+
+print(soup.find_all("h1"))
+
+* using regex
+import re
+soup.find_all(re.compile("[ou]l"))
+soup.find_all(re.compile("h[1-9]"))
+
+*using list
+soup.find_all(['h1', 'a', 'p'])
+
+*using attributes
+soup.find_all(attrs={'class':'banner'})
+soup.find_all(attrs={'class':'banner', 'id':'jumbotron'})
+
+*using a function
+def has_banner_class_and_hello_world(tag):
+    return tag.attr('class') == "banner" and tag.string == "Hello world"
+
+soup.find_all(has_banner_class_and_hello_world)
+output = <div class="banner">Hello world</div>
+
+### select for css selectors ###
+
+prefix = "https://s3.amazonaws.com/codecademy-content/courses/beautifulsoup/"
+
+soup = BeautifulSoup(webpage, "html.parser")
+
+turtle_links = soup.find_all("a")
+links = []
+#go through all of the a tags and get the links associated with them:
+for a in turtle_links:
+  links.append(prefix+a["href"])
+    
+#Define turtle_data:
+turtle_data = {}
+
+#follow each link:
+for link in links:
+  webpage = requests.get(link)
+  turtle = BeautifulSoup(webpage.content, "html.parser")
+  #Add your code here:
+  turtle_name = turtle.select(".name")[0]
+  turtle_data[turtle_name] = []
+
+* example: soup.select(".recipeLink")
+ 
+### reading text ###
+
+#Define turtle_data:
+turtle_data = {}
+
+#follow each link:
+for link in links:
+  webpage = requests.get(link)
+  turtle = BeautifulSoup(webpage.content, "html.parser")
+  turtle_name = turtle.select(".name")[0]
+  turtle_data[turtle_name.get_text()] = turtle.find('ul').get_text('|').split('|')
+
+print(turtle_data)
+
+### turn into df ###
+
+turtle_df = pd.DataFrame.from_dict(turtle_data, orient='index')
+print(turtle_df)
+
+#### chocolate scraping with beautiful soups ###
+
+import codecademylib3_seaborn
+from bs4 import BeautifulSoup
+import requests
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+webpage_response = requests.get("https://s3.amazonaws.com/codecademy-content/courses/beautifulsoup/cacao/index.html")
+webpage = webpage_response.content
+soup = BeautifulSoup(webpage, 'html.parser')
+print(soup)
+
+#find all tags for ratings
+rating =soup.find_all(attrs={'class': 'Rating'})
+
+ratings = []
+for tag in rating[1:]:
+  temp = tag.get_text()
+  ratings.append(float(temp))
+
+plt.hist(ratings)
+plt.title('cocoa ratings')
+plt.show()
+plt.clf()
+#find tags for all company
+company = soup.select('.Company')
+
+companys = []
+for tag in company[1:]:
+  temp = tag.get_text()
+  companys.append(temp)
+
+#create a dataframe
+dictionary = {'Company': companys, 'Ratings': ratings}
+df = pd.DataFrame.from_dict(dictionary)
+
+#find average rating for companys
+mean_rating = df.groupby('Company').Ratings.mean()
+ten_bests = mean_rating.nlargest(10)
+
+
+#find tags for all percents
+percent = soup.select('.CocoaPercent')
+
+percents = []
+for tag in percent[1:]:
+  temp = tag.get_text()
+  percents.append(temp)
+
+#create a new df with percents
+dictionary2 = {'Company': companys, 'Ratings': ratings, 'CocoaPercentage': percents}
+df2 = pd.DataFrame.from_dict(dictionary2)
+
+#strip the symbol away
+df2.CocoaPercentage = df2.CocoaPercentage.replace('[%]', '', regex= True)
+print(df2.head())
+
+#graph of ratings vs cocoa percents
+plt.scatter(df2.CocoaPercentage, df2.Ratings)
+z = np.polyfit(df2.CocoaPercentage, df2.Ratings, 1)
+line_function = np.poly1d(z)
+plt.plot(df2.CocoaPercentage, line_function(df2.CocoaPercentage), "r--")
+plt.show()
