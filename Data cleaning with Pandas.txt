@@ -1,0 +1,239 @@
+## using glob to find all the similar files #
+
+import codecademylib3_seaborn
+import pandas as pd
+import glob
+
+student_files = glob.glob('exams*.csv')
+
+df_list = []
+for file in student_files:
+  data = pd.read_csv(file)
+  df_list.append(data)
+
+students = pd.concat(df_list)
+print(students)
+print(len(students))
+
+### reshaping the dataframe using pd.melt() ###
+
+import codecademylib3_seaborn
+import pandas as pd
+from students import students
+
+#print(students.head())
+
+The parameters you provide are:
+
+    frame: the DataFrame you want to melt
+    id_vars: the column(s) of the old DataFrame to preserve
+    value_vars: the column(s) of the old DataFrame that you want to turn into variables
+    value_name: what to call the column of the new DataFrame that stores the values
+    var_name: what to call the column of the new DataFrame that stores the variables
+
+students = pd.melt(frame=students, id_vars=['full_name', 'gender_age', 'grade'], value_vars=['fractions', 'probability'], value_name='score', var_name='exam')
+
+print(students.head())
+print(students.columns)
+print(students['exam'].value_counts())
+
+### dealing with duplicates ####
+
+import codecademylib3_seaborn
+import pandas as pd
+from students import students
+
+print(students)
+
+duplicates = students.duplicated()
+print(duplicates.value_counts())
+
+students = students.drop_duplicates()
+duplicates = students.duplicated()
+print(duplicates.value_counts())
+
+* remove duplicate at certain column
+
+df = df.drop_duplicates(subset=['reps'])
+
+### splitting by index ###
+
+import codecademylib3_seaborn
+# plt to cut off multiple graphs #
+plt.clf()
+
+import pandas as pd
+from students import students
+
+print(students.columns)
+print(students.head())
+
+students['gender'] = students.gender_age.str[0]
+students['age'] = students.gender_age.str[1:]
+
+print(students.head())
+
+students = students[['full_name', 'grade', 'exam', 'score','gender', 'age']]
+
+### split by character ###
+
+import codecademylib3_seaborn
+import pandas as pd
+from students import students
+
+print(students)
+name_split = students.full_name.str.split(" ")
+students['first_name'] = name_split.str.get(0)
+students['last_name'] = name_split.str.get(1)
+
+print(students.head())
+
+#### looking at the type of data ###
+
+import codecademylib3_seaborn
+import pandas as pd
+from students import students
+
+print(students.head())
+
+print(students.dtypes)
+print(students.age.mean())
+
+##### string parsing: remove symbol and then convert string to integers ####
+
+import codecademylib3_seaborn
+import pandas as pd
+from students import students
+
+
+students.score = students.score.replace('[%]', '', regex=True)
+
+students.score = pd.to_numeric(students.score)
+
+#### split the string and convert to int ###
+
+import codecademylib3_seaborn
+import pandas as pd
+from students import students
+
+print(students)
+print(students.grade.head())
+students.grade = students.grade.str.split('(\d+)',expand=True)[1]
+
+print(students.dtypes)
+students.grade = pd.to_numeric(students.grade)
+
+avg_grade = students.grade.mean()
+print(avg_grade)
+
+### dealing with missing values #####
+
+import codecademylib3_seaborn
+import pandas as pd
+from students import students
+
+print(students)
+
+*** drop nan ***
+
+bill_df = bill_df.dropna(subset=['num_guests'])
+
+*** fill nan ***
+
+score_mean = students.score.mean()
+print(score_mean)
+students = students.fillna(value={'score': 0})
+score_mean_2 = students.score.mean()
+
+#### us census project ###
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import codecademylib3_seaborn
+import glob
+
+# open multiple files and combine into 1 df
+files = glob.glob('states*.csv')
+
+datasets = []
+for file in files:
+  data = pd.read_csv(file)
+  datasets.append(data)
+
+us_census = pd.concat(datasets)
+
+print(us_census.columns)
+print(us_census.dtypes)
+print(us_census.head())
+
+#remove symbol and convert to int
+us_census.Income = us_census.Income.str.replace('[\$]', '', regex=True)
+us_census.Income = pd.to_numeric(us_census.Income)
+
+#split population into two groups
+name_split = us_census.GenderPop.str.split('_')
+us_census['Men'] = name_split.str.get(0)
+us_census['Women'] = name_split.str.get(1)
+
+#replace m, f and convert to int
+us_census.Men = us_census.Men.str.replace('M', '')
+us_census.Women = us_census.Women.str.replace('F', '')
+us_census.Men = pd.to_numeric(us_census.Men)
+us_census.Women = pd.to_numeric(us_census.Women)
+
+print(us_census.head())
+# fil nan in income column
+num = us_census.TotalPop - us_census.Men
+us_census = us_census.fillna(value={'Women': num})
+
+print(us_census.Women)
+print(us_census.duplicated())
+
+#drop duplicates 
+us_census = us_census.drop_duplicates()
+print(us_census.duplicated())
+
+#scatter plot
+#plt.scatter(us_census.Women, us_census.Income) 
+#plt.show()
+
+print(us_census.columns)
+
+#plot histogram
+#replace nan
+us_census.Pacific = us_census.fillna(value={'Pacific': 0})
+
+#replace symbol 
+us_census.Hispanic = us_census.Hispanic.replace('[%]', '', regex=True)
+us_census.Hispanic = pd.to_numeric(us_census.Hispanic)
+us_census.White = us_census.White.replace('[%]', '', regex=True)
+us_census.White = pd.to_numeric(us_census.White)
+us_census.Black = us_census.Black.replace('[%]', '', regex=True)
+us_census.Black = pd.to_numeric(us_census.Black)
+us_census.Native = us_census.Native.replace('[%]', '', regex=True)
+us_census.Native = pd.to_numeric(us_census.Native)
+us_census.Asian = us_census.Asian.replace('[%]', '', regex=True)
+us_census.Asian = pd.to_numeric(us_census.Asian)
+us_census.Pacific = us_census.Pacific.replace('[%]', '', regex=True)
+us_census.Pacific = pd.to_numeric(us_census.Pacific)
+
+print(us_census.Hispanic)
+plt.hist(us_census.Hispanic, bins= 20)
+plt.title('Hispanic population')
+plt.show()
+
+plt.hist(us_census.White, bins= 20)
+plt.show()
+
+plt.hist(us_census.Black, bins= 20)
+plt.show()
+
+plt.hist(us_census.Native, bins= 20)
+plt.show()
+
+plt.hist(us_census.Asian, bins= 20)
+plt.show()
+
+plt.hist(us_census.Pacific, bins= 20)
+plt.show()
